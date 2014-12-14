@@ -15,7 +15,7 @@ homepage = "https://github.com/PistonDevelopers/texture_packer"
 
 name = "texture_packer"
 
-[dependencies.image]
+[dependencies]
 
-git = "https://github.com/PistonDevelopers/image"
+image = "~0.2.0"
 
