@@ -23,6 +23,7 @@ pub struct SkylinePacker<B: Buffer2d> {
 }
 
 impl<B: Buffer2d> SkylinePacker<B> {
+
     fn can_put(&self, i: usize, w: u32, h: u32) -> Option<u32> {
         let x = self.skylines[i].x;
         if x + w > self.width {
@@ -52,11 +53,10 @@ impl<B: Buffer2d> SkylinePacker<B> {
         let mut rect = Rect::new(0, 0, 0, 0);
 
         // keep the min_height as small as possible
-        for i in range(0, self.skylines.len()) {
-            match self.can_put(i, w, h) {
-                Some(y) => {
-                    if y + h < min_height ||
-                       (y + h == min_height && self.skylines[i].w < min_width) {
+        for i in 0 .. self.skylines.len() {
+            if let Some(y) = self.can_put(i, w, h) {
+                if y + h < min_height ||
+                    (y + h == min_height && self.skylines[i].w < min_width) {
                         min_height = y + h;
                         min_width = self.skylines[i].w;
                         index = Some(i);
@@ -65,14 +65,11 @@ impl<B: Buffer2d> SkylinePacker<B> {
                         rect.w = w;
                         rect.h = h;
                     }
-                },
-                _ => {},
             }
 
-            match self.can_put(i, h, w) {
-                Some(y) => {
-                    if y + w < min_height ||
-                       (y + w == min_height && self.skylines[i].w < min_width) {
+            if let Some(y) = self.can_put(i, h, w) {
+                if y + w < min_height ||
+                    (y + w == min_height && self.skylines[i].w < min_width) {
                         min_height = y + w;
                         min_width = self.skylines[i].w;
                         index = Some(i);
@@ -81,8 +78,6 @@ impl<B: Buffer2d> SkylinePacker<B> {
                         rect.w = h;
                         rect.h = w;
                     }
-                },
-                _ => {},
             }
         }
 
@@ -140,6 +135,15 @@ impl<B: Buffer2d> SkylinePacker<B> {
 impl<B: Buffer2d> Packer for SkylinePacker<B> {
     type Buffer = B;
 
+    fn dimensions(&self) -> (u32, u32) {
+        (self.width, self.height)
+    }
+
+    fn set_dimensions(&mut self, w: u32, h: u32) {
+        self.width = w;
+        self.height = h;
+    }
+
     fn new(buf: B) -> SkylinePacker<B> {
         let (width, height) = buf.dimensions();
         let mut skylines = Vec::new();
@@ -163,29 +167,28 @@ impl<B: Buffer2d> Packer for SkylinePacker<B> {
         width += self.margin;
         height += self.margin;
 
-        match self.find_skyline(width, height) {
-            Some((i, mut rect)) => {
-                if width == rect.w {
-                    self.buf.patch(rect.x, rect.y, buf);
-                } else {
-                    self.buf.patch_rotated(rect.x, rect.y, buf);
-                }
+        if let Some((i, mut rect)) = self.find_skyline(width, height) {
+            if width == rect.w {
+                self.buf.patch(rect.x, rect.y, buf);
+            } else {
+                self.buf.patch_rotated(rect.x, rect.y, buf);
+            }
 
-                self.split(i, &rect);
-                self.merge();
+            self.split(i, &rect);
+            self.merge();
 
-                rect.w -= self.margin;
-                rect.h -= self.margin;
-                Some(rect)
-            },
-            _ => {
-                None
-            },
-        }
+            rect.w -= self.margin;
+            rect.h -= self.margin;
+            Some(rect)
+        } else { None }
     }
 
     fn buf(&self) -> &B {
         &self.buf
+    }
+
+    fn buf_mut(&mut self) -> &mut B {
+        &mut self.buf
     }
 
     fn into_buf(self) -> B {

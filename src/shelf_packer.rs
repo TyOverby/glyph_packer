@@ -18,6 +18,15 @@ pub struct ShelfPacker<B: Buffer2d> {
 impl<B: Buffer2d> Packer for ShelfPacker<B> {
     type Buffer = B;
 
+    fn dimensions(&self) -> (u32, u32) {
+        (self.width, self.height)
+    }
+
+    fn set_dimensions(&mut self, w: u32, h: u32) {
+        self.width = w;
+        self.height = h;
+    }
+
     fn new(buf: B) -> ShelfPacker<B> {
         let (w, h) = buf.dimensions();
         ShelfPacker {
@@ -86,6 +95,10 @@ impl<B: Buffer2d> Packer for ShelfPacker<B> {
 
     fn buf(&self) -> &B {
         &self.buf
+    }
+
+    fn buf_mut(&mut self) -> &mut B {
+        &mut self.buf
     }
 
     fn into_buf(self) -> B {

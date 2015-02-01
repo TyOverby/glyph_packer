@@ -9,6 +9,8 @@ pub struct MaxrectPacker<B: Buffer2d> {
     buf: B,
     free_areas: Vec<Rect>,
     margin: u32,
+    width: u32,
+    height: u32
 }
 
 impl<B: Buffer2d> MaxrectPacker<B> {
@@ -18,7 +20,7 @@ impl<B: Buffer2d> MaxrectPacker<B> {
         let mut index = None;
         let mut rect = Rect::new(0, 0, 0, 0);
 
-        for i in range(0, self.free_areas.len()) {
+        for i in 0 .. self.free_areas.len() {
             let ref area = self.free_areas[i];
 
             if w <= area.w && h <= area.h {
@@ -84,8 +86,8 @@ impl<B: Buffer2d> MaxrectPacker<B> {
             let mut new_free_areas = Vec::new();
             let mut to_be_removed = Vec::new();
 
-            for i in range(0, self.free_areas.len()) {
-                for j in range(0, self.free_areas.len()) {
+            for i in 0 .. self.free_areas.len() {
+                for j in 0 .. self.free_areas.len() {
                     if i != j {
                         if self.free_areas[i].contains(&self.free_areas[j]) {
                             to_be_removed.push(j);
@@ -94,7 +96,7 @@ impl<B: Buffer2d> MaxrectPacker<B> {
                 }
             }
 
-            for i in range(0, self.free_areas.len()) {
+            for i in 0 .. self.free_areas.len() {
                 if !to_be_removed.contains(&i) {
                     new_free_areas.push(self.free_areas[i]);
                 }
@@ -106,6 +108,30 @@ impl<B: Buffer2d> MaxrectPacker<B> {
 
 impl<B: Buffer2d> Packer for MaxrectPacker<B> {
     type Buffer = B;
+
+    fn dimensions(&self) -> (u32, u32) {
+        (self.width, self.height)
+    }
+
+    fn set_dimensions(&mut self, w: u32, h: u32) {
+        let (old_w, old_h) = self.dimensions();
+        self.width = w;
+        self.height = h;
+
+        let delta_w = w - old_w;
+        let delta_h = h - old_h;
+
+        self.free_areas.push(Rect {
+            x: old_w, y: 0,
+            w: delta_w, h: delta_h
+        });
+
+        self.free_areas.push(Rect {
+            x: 0, y: old_h,
+            w: self.height, h: delta_h
+        });
+    }
+
     fn new(buf: B) -> MaxrectPacker<B> {
         let (width, height) = buf.dimensions();
 
@@ -118,6 +144,8 @@ impl<B: Buffer2d> Packer for MaxrectPacker<B> {
         });
 
         MaxrectPacker {
+            width: width,
+            height: height,
             buf: buf,
             free_areas: free_areas,
             margin: 0,
@@ -151,6 +179,10 @@ impl<B: Buffer2d> Packer for MaxrectPacker<B> {
 
     fn buf(&self) -> &B {
         &self.buf
+    }
+
+    fn buf_mut(&mut self) -> &mut B {
+        &mut self.buf
     }
 
     fn into_buf(self) -> B {

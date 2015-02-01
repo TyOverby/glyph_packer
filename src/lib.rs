@@ -1,14 +1,14 @@
-#![allow(unstable)]
+#![feature(collections, core)]
 
 extern crate image;
 
-pub use packer::Packer;
+pub use packer::{Packer, GrowingPacker};
 pub use shelf_packer::ShelfPacker;
 pub use guillotine_packer::GuillotinePacker;
 pub use maxrect_packer::MaxrectPacker;
 pub use skyline_packer::SkylinePacker;
 pub use rect::Rect;
-pub use buffer2d::Buffer2d;
+pub use buffer2d::{Buffer2d, ResizeBuffer};
 
 mod packer;
 mod shelf_packer;

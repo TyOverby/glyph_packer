@@ -1,4 +1,3 @@
-
 use {
     Buffer2d,
     Rect,
@@ -6,6 +5,8 @@ use {
 };
 
 pub struct GuillotinePacker<B: Buffer2d> {
+    width: u32,
+    height: u32,
     buf: B,
     free_areas: Vec<Rect>,
     margin: u32,
@@ -18,7 +19,7 @@ impl<B: Buffer2d> GuillotinePacker<B> {
         let mut min_area = None;
         let mut rect = Rect::new(0, 0, 0, 0);
 
-        for i in range(0, self.free_areas.len()) {
+        for i in 0 .. self.free_areas.len() {
             let ref area = self.free_areas[i];
             let a = area.area();
 
@@ -43,14 +44,7 @@ impl<B: Buffer2d> GuillotinePacker<B> {
             }
         }
 
-        match index {
-            Some(i) => {
-                Some((i, rect))
-            },
-            _ => {
-                None
-            },
-        }
+        index.map(|i| (i, rect))
     }
 
     // Shorter Axis Split
@@ -95,6 +89,15 @@ impl<B: Buffer2d> GuillotinePacker<B> {
 impl<B: Buffer2d> Packer for GuillotinePacker<B> {
     type Buffer = B;
 
+    fn dimensions(&self) -> (u32, u32) {
+        (self.width, self.height)
+    }
+
+    fn set_dimensions(&mut self, w: u32, h: u32) {
+        self.width = w;
+        self.height = h;
+    }
+
     fn new(buf: B) -> GuillotinePacker<B> {
         let (width, height) = buf.dimensions();
         let mut free_areas = Vec::new();
@@ -109,6 +112,8 @@ impl<B: Buffer2d> Packer for GuillotinePacker<B> {
             buf: buf,
             free_areas: free_areas,
             margin: 0,
+            width: width,
+            height: height
         }
     }
 
@@ -116,28 +121,27 @@ impl<B: Buffer2d> Packer for GuillotinePacker<B> {
         let (mut width, mut height) = buf.dimensions();
         width += self.margin;
         height += self.margin;
-        match self.find_free_area(width, height) {
-            Some((i, mut rect)) => {
-                if width == rect.w {
-                    self.buf.patch(rect.x, rect.y, buf);
-                } else {
-                    self.buf.patch_rotated(rect.x, rect.y, buf);
-                }
+        if let Some((i, mut rect)) = self.find_free_area(width, height) {
+            if width == rect.w {
+                self.buf.patch(rect.x, rect.y, buf);
+            } else {
+                self.buf.patch_rotated(rect.x, rect.y, buf);
+            }
 
-                self.split(i, &rect);
+            self.split(i, &rect);
 
-                rect.w -= self.margin;
-                rect.h -= self.margin;
-                Some(rect)
-            },
-            _ => {
-                None
-            },
-        }
+            rect.w -= self.margin;
+            rect.h -= self.margin;
+            Some(rect)
+        } else { None }
     }
 
     fn buf(&self) -> &B {
         &self.buf
+    }
+
+    fn buf_mut(&mut self) -> &mut B {
+        &mut self.buf
     }
 
     fn into_buf(self) -> B {

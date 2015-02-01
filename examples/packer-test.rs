@@ -1,9 +1,9 @@
-#![allow(unstable)]
+#![feature(io, path, collections, core)]
 
 extern crate image;
 extern crate texture_packer;
 
-use std::io::File;
+use std::old_io::File;
 
 use texture_packer::{
     Packer,
@@ -25,7 +25,7 @@ fn pack<P: Packer<Buffer=DynamicImage>>(output_filename: &str) {
     let buf = DynamicImage::ImageRgba8(ImageBuffer::new(OUTPUT_IMAGE_WIDTH, OUTPUT_IMAGE_HEIGHT));
     let mut packer: P = Packer::new(buf);
 
-    for i in range(1u32, 11) {
+    for i in 1u32 .. 11 {
         let mut filename = "./assets/".to_string();
         filename.push_str(format!("{}.png", i).as_slice());
         let image = image::open(&Path::new(filename)).unwrap();
