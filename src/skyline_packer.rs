@@ -141,8 +141,15 @@ impl<B: Buffer2d> Packer for SkylinePacker<B> {
     }
 
     fn set_dimensions(&mut self, w: u32, h: u32) {
+        let (old_w, old_h) = self.dimensions();
+
         self.width = w;
         self.height = h;
+        self.skylines.push(Skyline {
+            x: old_w,
+            y: 0,
+            w: w - old_w
+        });
     }
 
     fn new(buf: B) -> SkylinePacker<B> {
