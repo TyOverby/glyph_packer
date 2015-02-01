@@ -67,6 +67,7 @@ impl<B: Buffer2d> SkylinePacker<B> {
                     }
             }
 
+            /*
             if let Some(y) = self.can_put(i, h, w) {
                 if y + w < min_height ||
                     (y + w == min_height && self.skylines[i].w < min_width) {
@@ -78,7 +79,7 @@ impl<B: Buffer2d> SkylinePacker<B> {
                         rect.w = h;
                         rect.h = w;
                     }
-            }
+            }*/
         }
 
         if index.is_some() {
