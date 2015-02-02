@@ -36,6 +36,7 @@ impl <A, P: Packer<Buffer = A>> GrowingPacker for P where A: ResizeBuffer {
                 if nw <= w || nh <= h {
                     panic!("Resize function must make the buffer larger");
                 }
+                self.buf_mut().resize(nw, nh);
                 self.set_dimensions(nw, nh);
                 self.pack_resize(buf, resize_fn)
             }
