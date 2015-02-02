@@ -42,7 +42,9 @@ impl<B: Buffer2d> SkylinePacker<B> {
             }
             width_left -= self.skylines[i].w;
             i += 1;
-            assert!(i < self.skylines.len());
+            if i >= self.skylines.len() {
+                return None;
+            }
         }
     }
 
@@ -141,7 +143,7 @@ impl<B: Buffer2d> Packer for SkylinePacker<B> {
     }
 
     fn set_dimensions(&mut self, w: u32, h: u32) {
-        let (old_w, old_h) = self.dimensions();
+        let (old_w, _) = self.dimensions();
 
         self.width = w;
         self.height = h;
