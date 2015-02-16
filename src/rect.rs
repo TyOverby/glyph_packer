@@ -1,5 +1,5 @@
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
 pub struct Rect {
     pub x: u32,
     pub y: u32,

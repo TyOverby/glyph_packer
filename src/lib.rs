@@ -1,4 +1,4 @@
-#![feature(collections, core)]
+#![feature(collections, core, hash)]
 
 extern crate image;
 
