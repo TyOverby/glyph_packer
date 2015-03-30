@@ -14,6 +14,5 @@ homepage = "https://github.com/TyOverby/glyph_packer"
 
 name = "glyph_packer"
 
-[dependencies.image]
-git = "https://github.com/PistonDevelopers/image.git"
-
+[dependencies]
+image = "*"
